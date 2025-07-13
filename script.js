@@ -16,6 +16,10 @@ class TodoApp {
     // Simple states
     warningState = false;
     searchState = "";
+    sortState = {
+        column: 'id',
+        ascending: true
+    }
     
     constructor(apiEndpoint, tableId, searchId, warningId) {
         this.apiEndpoint = apiEndpoint;
@@ -40,6 +44,7 @@ class TodoApp {
         
         // Set bindings for search
         this.bindSearch();
+        this.bindSorts();
     }
 
     /**
@@ -114,6 +119,34 @@ class TodoApp {
     }
 
     /**
+     * Bind events to the sort buttons.
+     */
+    bindSorts() {
+        // Todo: create a global container to extract table stuff from... (dataTable)
+        $('.todo-sort').on('click', (event) => {
+            // Grab the dataset for the sort
+            const column = event.currentTarget.dataset.sort;
+
+            // Guard against no sort
+            if (!column) {
+                console.warn('Sort column not specified');
+                return;
+            }
+
+            // Update the sort state (flip the ascending if the column matches, otherwise default to true - accessibility and mobile friendly)
+            this.sortState.ascending = column === this.sortState.column ? !this.sortState.ascending : true;
+            this.sortState.column = column;
+
+            // Update the icons
+            this.updateSortIcons(event.currentTarget);
+
+            // Sort and re-render
+            this.filterAndSort();
+            this.renderTable();
+        });
+    }
+
+    /**
      * Run filters and sort on the list.
      */
     filterAndSort() {
@@ -122,8 +155,20 @@ class TodoApp {
 
         todoList = TodoFilter.filter(todoList, this.searchState);
         
+        // Sort second so the list is smaller
+        todoList = TodoSort.sort(todoList, this.sortState);
+        
         // Update the filtered todos
         this.filteredTodos = todoList;
+    }
+
+    /**
+     * Update sort icons by showing and hiding filled/unfilled carets.
+     * @param {HTMLElement} target
+     */
+    updateSortIcons(target) {
+        $('.active-asc, .active-dsc').removeClass(['active-asc', 'active-dsc']);
+        target.classList.add(this.sortState.ascending ? 'active-asc' : 'active-dsc');
     }
 
     /**
@@ -160,6 +205,34 @@ class TodoFilter {
             return todos;
         
         return todos.filter(todo => todo.title.toLowerCase().includes(term));
+    }
+}
+
+/**
+ * Unit testable static sort to run sorts.
+ * @class TodoFilter
+ */
+class TodoSort {
+
+    /**
+     * Sort the passed list based on simple value sort.
+     * Simple sort to save time
+     * Todo: Coerce strings to numbers to safely use .localeCompare (edge cases like accents)
+     * @param {Array} todos
+     * @param {string} column
+     * @param {boolean} ascending
+     * @returns {Array}
+     */
+    static sort(todos, { column, ascending }) {
+        return [...todos].sort((a, b) => {
+            if (a[column] < b[column])
+                return ascending ? -1 : 1;
+
+            if (a[column] > b[column])
+                return ascending ? 1 : -1;
+
+            return 0;
+        });
     }
 }
 

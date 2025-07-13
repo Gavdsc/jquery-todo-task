@@ -2,3 +2,25 @@
 #warningBox:empty {
     display: none;
 }
+
+/* Simple styles to hide sorts (and tweak an annoying alignment bug) */
+.todo-sort {
+    cursor: pointer;
+}
+
+.todo-sort .sort-down-fill,
+.todo-sort .sort-down {
+    margin-top: -2px;
+}
+
+.todo-sort .sort-up-fill,
+.todo-sort .sort-down-fill,
+.todo-sort.active-asc .sort-up,
+.todo-sort.active-dsc .sort-down {
+    display: none;
+}
+
+.todo-sort.active-dsc .sort-down-fill,
+.todo-sort.active-asc .sort-up-fill {
+    display: block;
+}
