@@ -247,7 +247,7 @@ class TodoFilter {
 
 /**
  * Unit testable static sort to run sorts.
- * @class TodoFilter
+ * @class TodoSort
  */
 class TodoSort {
 
