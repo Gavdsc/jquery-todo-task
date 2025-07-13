@@ -1,8 +1,12 @@
 $(document).ready(() => {
-    // Just check the JQuery CDN is loading
-    console.log('JQuery loaded'); 
-    
-    new TodoApp('https://jsonplaceholder.typicode.com/todos', 'todoList', 'search', 'todoPagination', 'warningBox')
+    new TodoApp(
+        'https://jsonplaceholder.typicode.com/todos', 
+        'todoList', 
+        'search', 
+        'todoPagination', 
+        'todo-sort', 
+        'warningBox'
+    );
 });
 
 /**
@@ -27,15 +31,17 @@ class TodoApp {
      * @param {string} tableId
      * @param {string} paginationId
      * @param {string} searchId
+     * @param {string} sortClass
      * @param {string} warningId
      */
-    constructor(apiEndpoint, tableId, searchId, paginationId, warningId) {
+    constructor(apiEndpoint, tableId, searchId, paginationId, sortClass, warningId) {
         this.apiEndpoint = apiEndpoint;
 
         // Select once, and save
         this.table = $(`#${tableId}`);
         this.search = $(`#${searchId}`);
         this.pagination = new Pagination($(`#${paginationId}`), this.onPageChange);
+        this.sortClass = sortClass;
         this.warning = $(`#${warningId}`);
         
         // Clear the search on page reload
@@ -144,8 +150,7 @@ class TodoApp {
      * Bind events to the sort buttons.
      */
     bindSorts() {
-        // Todo: create a global container to extract table stuff from... (dataTable)
-        $('.todo-sort').on('click', (event) => {
+        $(`.${this.sortClass}`).on('click', (event) => {
             // Grab the dataset for the sort
             const column = event.currentTarget.dataset.sort;
 
@@ -249,7 +254,7 @@ class TodoSort {
     /**
      * Sort the passed list based on simple value sort.
      * Simple sort to save time
-     * Todo: Coerce strings to numbers to safely use .localeCompare (edge cases like accents)
+     * Note: More complex improvement would be to coerce strings to numbers to safely use .localeCompare (for edge cases like accents)
      * @param {Array} todos
      * @param {string} column
      * @param {boolean} ascending
@@ -275,10 +280,9 @@ class TodoSort {
 class Pagination {
     
     // Simple state
-    // Todo: pass these in constructor to make reusable
     current = 1;
+    count = 0;
     perPage = 10;
-    todoCount = 0;
     visible = 5;
     
     /**
@@ -286,11 +290,13 @@ class Pagination {
      * @param {JQuery<HTMLElement>} container
      * @param {function} onPageChange
      * @param {number} visible
+     * @param {number} perPage
      */
-    constructor(container, onPageChange, visible = 5) {
+    constructor(container, onPageChange, visible = 5, perPage = 10) {
         this.container = container;
         this.onPageChange = onPageChange;
         this.visible = visible;
+        this.perPage = perPage;
 
         this.bind();
     }
@@ -321,13 +327,13 @@ class Pagination {
      */
     render() {
         // First get the number of pages (filteredTodos, not todos)
-        const pages = Math.ceil(this.todoCount / this.perPage);
+        const pages = Math.ceil(this.count / this.perPage);
 
         // First empty the pagination
         this.container.empty();
 
-        // Don't draw pagination if only 1 page
-        if (pages === 1)
+        // Don't draw pagination if 1 or fewer pages
+        if (pages <= 1)
             return;
 
         // Set previous and next pages 
@@ -400,15 +406,15 @@ class Pagination {
 
     /**
      * Update pagination and re-render.
-     * @param {number} todoCount
+     * @param {number} count
      * @param {number} current
      */
-    update(todoCount, current) {
+    update(count, current) {
         // Don't re-render if unnecessary 
-        if (this.todoCount === todoCount && this.current === current)
+        if (this.count === count && this.current === current)
             return;
 
-        this.todoCount = todoCount;
+        this.count = count;
         // Bug: No TypeScript, so don't forget to coerce to number first
         this.current = +current;
         this.render();

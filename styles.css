@@ -24,3 +24,25 @@
 .todo-sort.active-asc .sort-up-fill {
     display: block;
 }
+
+/* Bootstrap’s sm breakpoint */
+@media (max-width: 767.98px) {
+    #todoPagination a {
+        font-size: .85rem;
+    }
+
+    #todoPagination .page-link {
+        padding: 0.5rem 0.5rem;
+    }
+}
+
+/* Stack pagination at smaller sizes so it remains touch friendly */
+/* Could just set to pagination-sm, but it overflows slightly */
+@media (max-width: 400px) {
+    #todoPagination {
+        flex-direction: column;
+    }
+    #todoPagination .page-item {
+        margin-bottom: 0.25rem;
+    }
+}
