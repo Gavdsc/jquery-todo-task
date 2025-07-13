@@ -2,7 +2,7 @@ $(document).ready(() => {
     // Just check the JQuery CDN is loading
     console.log('JQuery loaded'); 
     
-    new TodoApp('https://jsonplaceholder.typicode.com/todos', 'todoList')
+    new TodoApp('https://jsonplaceholder.typicode.com/todos', 'todoList', 'warningBox')
 });
 
 /**
@@ -12,11 +12,15 @@ $(document).ready(() => {
 class TodoApp {
     todos = [];
 
-    constructor(apiEndpoint, tableId) {
+    // Simple warning state
+    warningState = false;
+
+    constructor(apiEndpoint, tableId, warningId) {
         this.apiEndpoint = apiEndpoint;
 
         // Select once, and save
         this.table = $(`#${tableId}`);
+        this.warning = $(`#${warningId}`);
 
         this.init();
     }
@@ -46,8 +50,7 @@ class TodoApp {
                 this.renderTable();
             },
             error: () => {
-                // Todo: Add an error handler
-                console.warn('fetch failed');
+                this.onError('Failed to fetch todos.');
             }
         })
     }
@@ -67,5 +70,21 @@ class TodoApp {
 
         // Set the table html
         this.table.html(rows);
+    }
+
+    /**
+     * A simple visual error handler.
+     * @param {string} message
+     */
+    onError(message) {
+        if (message === '') {
+            this.warningState = false;
+            this.warning.empty();
+            return;
+        }
+
+        // Optionally could .show().hide() here, but setting in css
+        this.warningState = true;
+        this.warning.text(message);
     }
 }

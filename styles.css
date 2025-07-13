@@ -1,1 +1,4 @@
-/* Empty */
+/* Hide warningBox when empty https://caniuse.com/?search=%3Aempty */
+#warningBox:empty {
+    display: none;
+}
